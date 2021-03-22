@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Xilium.CefGlue.BrowserProcess.Helpers;
 using Xilium.CefGlue.Common.Shared;
 
@@ -13,6 +14,8 @@ namespace Xilium.CefGlue.BrowserProcess
             try
             {
 #endif
+                NativeLibsLoader.Install();
+
                 var parentProcessId = GetArgumentValue(args, CommandLineArgs.ParentProcessId);
                 if (parentProcessId != null && int.TryParse(parentProcessId, out var parentProcessIdAsInt))
                 {
@@ -24,7 +27,6 @@ namespace Xilium.CefGlue.BrowserProcess
 
                 var customSchemesArg = GetArgumentValue(args, CommandLineArgs.CustomScheme);
                 var customSchemes = CustomScheme.FromCommandLineValue(customSchemesArg);
-
                 // first argument is the path of the executable, but its ignored for now
                 var mainArgs = new CefMainArgs(new[] { "BrowserProcess" }.Concat(args).ToArray());
                 var exitCode = CefRuntime.ExecuteProcess(mainArgs, new RendererCefApp(customSchemes), IntPtr.Zero);
@@ -34,11 +36,15 @@ namespace Xilium.CefGlue.BrowserProcess
                 }
 #if DEBUG
             }
-            catch (Exception)
+            catch
             {
-                System.Diagnostics.Debugger.Launch();
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    System.Diagnostics.Debugger.Launch();
+                }
+                throw;
             }
-#endif
+#endif      
         }
 
         private static string GetArgumentValue(string[] args, string argName)

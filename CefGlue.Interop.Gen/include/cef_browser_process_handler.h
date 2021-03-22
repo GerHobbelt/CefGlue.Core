@@ -69,22 +69,11 @@ class CefBrowserProcessHandler : public virtual CefBaseRefCounted {
       CefRefPtr<CefCommandLine> command_line) {}
 
   ///
-  // Called on the browser process IO thread after the main thread has been
-  // created for a new render process. Provides an opportunity to specify extra
-  // information that will be passed to
-  // CefRenderProcessHandler::OnRenderThreadCreated() in the render process. Do
-  // not keep a reference to |extra_info| outside of this method.
-  ///
-  /*--cef()--*/
-  virtual void OnRenderProcessThreadCreated(
-      CefRefPtr<CefListValue> extra_info) {}
-
-  ///
   // Return the handler for printing on Linux. If a print handler is not
   // provided then printing will not be supported on the Linux platform.
   ///
   /*--cef()--*/
-  virtual CefRefPtr<CefPrintHandler> GetPrintHandler() { return NULL; }
+  virtual CefRefPtr<CefPrintHandler> GetPrintHandler() { return nullptr; }
 
   ///
   // Called from any thread when work has been scheduled for the browser process

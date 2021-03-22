@@ -38,12 +38,12 @@ namespace Xilium.CefGlue.WPF.Platform
         {
             if (_control.IsLoaded || (_control.RenderSize.Width > 0 && _control.RenderSize.Height > 0))
             {
-                // fire as soon as the control becomes loaded or the render size dimensions > 0
+                // fire as soon as the control becomes loaded or the render size is not empty
                 SizeChanged?.Invoke(new CefSize((int)_control.RenderSize.Width, (int)_control.RenderSize.Height));
             }
         }
 
-        public IntPtr? GetHostViewHandle()
+        public IntPtr? GetHostViewHandle(int initialWidth, int initialHeight)
         {
             var window = Window.GetWindow(_control);
             if (window != null)

@@ -82,6 +82,8 @@ c2cs_types = {
     'cef_pdf_print_settings_t': 'cef_pdf_print_settings_t',
     'cef_composition_underline_t': 'cef_composition_underline_t',
     'cef_touch_event_t': 'cef_touch_event_t',
+    'cef_audio_parameters_t': 'cef_audio_parameters_t',
+    'cef_media_sink_device_info_t': 'cef_media_sink_device_info_t',
     
 
     # platform dependend structs
@@ -163,6 +165,9 @@ c2cs_enumtypes = {
 	'cef_ssl_content_status_t': 'CefSslContentStatus',
     'cef_menu_color_type_t': 'CefMenuColorType',
     'cef_state_t': 'CefState',
+    'cef_media_route_connection_state_t': 'CefMediaRouteConnectionState',
+    'cef_media_route_create_result_t': 'CefMediaRouteCreateResult',
+    'cef_media_sink_icon_type_t': 'CefMediaSinkIconType',
     }
 
 c2cs_structtypes = { }
@@ -174,7 +179,11 @@ classdef = { }
 
 
 def load(schema_name, header):
-    exec("from schema_%s import *" % schema_name) in globals()
+    import schema_cef3
+    global classdef
+    classdef = schema_cef3.classdef
+
+    # exec("from schema_%s import *" % schema_name) in globals()
 
     # build C API type name to C# type name map (struct types)
     c2cs_structtypes.clear();
@@ -186,20 +195,22 @@ def load(schema_name, header):
 
 
 def is_handler(cls):
-    if classdef.has_key(cls.get_name()):
-        return classdef[cls.get_name()]['role'] & ROLE_HANDLER == ROLE_HANDLER
+    cls_name = cls.get_name()
+    if cls_name in classdef:
+        return classdef[cls_name]['role'] & ROLE_HANDLER == ROLE_HANDLER
     return False
 
 def is_proxy(cls):
-    if classdef.has_key(cls.get_name()):
-        return classdef[cls.get_name()]['role'] & ROLE_PROXY == ROLE_PROXY
+    cls_name = cls.get_name()
+    if cls_name in classdef:
+        return classdef[cls_name]['role'] & ROLE_PROXY == ROLE_PROXY
     return False
 
 def is_reversible(cls):
     name = cls.get_name()
-    if classdef.has_key(name):
+    if name in classdef:
         cdef = classdef[name]
-        if cdef.has_key('reversible'):
+        if 'reversible' in cdef:
             return cdef['reversible']
     return False
 
@@ -207,10 +218,10 @@ def isref(ctype):
     return ctype.endswith('*')
 
 def is_platform_retval(csntype):
-    return c2cs_platform_retval.has_key(csntype)
+    return csntype in c2cs_platform_retval
 
 def get_platform_retval_postfixs(csntype):
-    if c2cs_platform_retval.has_key(csntype):
+    if csntype in c2cs_platform_retval:
         return c2cs_platform_retval[csntype]
     return ['']
 
@@ -243,11 +254,11 @@ def c2cs_type(ctype):
     if ctype.startswith('_'):
         ctype = ctype[1:].strip()
 
-    if c2cs_types.has_key(ctype):
+    if ctype in c2cs_types:
         ret = c2cs_types[ctype]
-    elif c2cs_enumtypes.has_key(ctype):
+    elif ctype in c2cs_enumtypes:
         ret = c2cs_enumtypes[ctype]
-    elif c2cs_structtypes.has_key(ctype):
+    elif ctype in c2cs_structtypes:
         ret = c2cs_structtypes[ctype]
     else:
         sys.stdout.write('Warning! C type "%s" is not mapped to C# type (processed to "%s").\n' % (warn_ctype, ctype))
@@ -280,8 +291,8 @@ def get_iname(cls):
     return cls.get_capi_name()
 
 def cpp2csname(cppname):
-    if classdef.has_key(cppname):
-        if classdef[cppname].has_key('name'):
+    if cppname in classdef:
+        if 'name' in classdef[cppname]:
             return classdef[cppname]['name']
     return cppname
 
@@ -302,7 +313,7 @@ def get_overview(cls):
     return result
 
 def is_autodispose(cls):
-    if classdef.has_key(cls.get_name()):
+    if cls.get_name() in classdef:
         clsinfo = classdef[cls.get_name()]
-        return clsinfo.has_key('autodispose') and clsinfo['autodispose'] == True
+        return 'autodispose' in clsinfo and clsinfo['autodispose'] == True
     return False

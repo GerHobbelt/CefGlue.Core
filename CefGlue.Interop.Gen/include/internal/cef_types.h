@@ -170,18 +170,34 @@ typedef struct _cef_settings_t {
   // will be used. If this value is empty on macOS then a helper executable must
   // exist at "Contents/Frameworks/<app> Helper.app/Contents/MacOS/<app> Helper"
   // in the top-level app bundle. See the comments on CefExecuteProcess() for
-  // details. Also configurable using the "browser-subprocess-path" command-line
-  // switch.
+  // details. If this value is non-empty then it must be an absolute path. Also
+  // configurable using the "browser-subprocess-path" command-line switch.
   ///
   cef_string_t browser_subprocess_path;
 
   ///
   // The path to the CEF framework directory on macOS. If this value is empty
   // then the framework must exist at "Contents/Frameworks/Chromium Embedded
-  // Framework.framework" in the top-level app bundle. Also configurable using
-  // the "framework-dir-path" command-line switch.
+  // Framework.framework" in the top-level app bundle. If this value is
+  // non-empty then it must be an absolute path. Also configurable using the
+  // "framework-dir-path" command-line switch.
   ///
   cef_string_t framework_dir_path;
+
+  ///
+  // The path to the main bundle on macOS. If this value is empty then it
+  // defaults to the top-level app bundle. If this value is non-empty then it
+  // must be an absolute path. Also configurable using the "main-bundle-path"
+  // command-line switch.
+  ///
+  cef_string_t main_bundle_path;
+
+  ///
+  // Set to true (1) to enable use of the Chrome runtime in CEF. This feature is
+  // considered experimental and is not recommended for most users at this time.
+  // See issue #2969 for details.
+  ///
+  int chrome_runtime;
 
   ///
   // Set to true (1) to have the browser process message loop run in a separate
@@ -220,33 +236,35 @@ typedef struct _cef_settings_t {
 
   ///
   // The location where data for the global browser cache will be stored on
-  // disk. In non-empty this must be either equal to or a child directory of
-  // CefSettings.root_cache_path. If empty then browsers will be created in
-  // "incognito mode" where in-memory caches are used for storage and no data is
-  // persisted to disk. HTML5 databases such as localStorage will only persist
-  // across sessions if a cache path is specified. Can be overridden for
-  // individual CefRequestContext instances via the
-  // CefRequestContextSettings.cache_path value.
+  // disk. If this value is non-empty then it must be an absolute path that is
+  // either equal to or a child directory of CefSettings.root_cache_path. If
+  // this value is empty then browsers will be created in "incognito mode" where
+  // in-memory caches are used for storage and no data is persisted to disk.
+  // HTML5 databases such as localStorage will only persist across sessions if a
+  // cache path is specified. Can be overridden for individual CefRequestContext
+  // instances via the CefRequestContextSettings.cache_path value.
   ///
   cef_string_t cache_path;
 
   ///
   // The root directory that all CefSettings.cache_path and
   // CefRequestContextSettings.cache_path values must have in common. If this
-  // value is empty and CefSettings.cache_path is non-empty then this value will
-  // default to the CefSettings.cache_path value. Failure to set this value
-  // correctly may result in the sandbox blocking read/write access to the
-  // cache_path directory.
+  // value is empty and CefSettings.cache_path is non-empty then it will
+  // default to the CefSettings.cache_path value. If this value is non-empty
+  // then it must be an absolute path. Failure to set this value correctly may
+  // result in the sandbox blocking read/write access to the cache_path
+  // directory.
   ///
   cef_string_t root_cache_path;
 
   ///
   // The location where user data such as spell checking dictionary files will
-  // be stored on disk. If empty then the default platform-specific user data
-  // directory will be used ("~/.cef_user_data" directory on Linux,
-  // "~/Library/Application Support/CEF/User Data" directory on Mac OS X,
-  // "Local Settings\Application Data\CEF\User Data" directory under the user
-  // profile directory on Windows).
+  // be stored on disk. If this value is empty then the default
+  // platform-specific user data directory will be used ("~/.cef_user_data"
+  // directory on Linux, "~/Library/Application Support/CEF/User Data" directory
+  // on Mac OS X, "Local Settings\Application Data\CEF\User Data" directory
+  // under the user profile directory on Windows). If this value is non-empty
+  // then it must be an absolute path.
   ///
   cef_string_t user_data_path;
 
@@ -326,16 +344,17 @@ typedef struct _cef_settings_t {
   // The fully qualified path for the resources directory. If this value is
   // empty the cef.pak and/or devtools_resources.pak files must be located in
   // the module directory on Windows/Linux or the app bundle Resources directory
-  // on Mac OS X. Also configurable using the "resources-dir-path" command-line
-  // switch.
+  // on Mac OS X. If this value is non-empty then it must be an absolute path.
+  // Also configurable using the "resources-dir-path" command-line switch.
   ///
   cef_string_t resources_dir_path;
 
   ///
   // The fully qualified path for the locales directory. If this value is empty
-  // the locales directory must be located in the module directory. This value
-  // is ignored on Mac OS X where pack files are always loaded from the app
-  // bundle Resources directory. Also configurable using the "locales-dir-path"
+  // the locales directory must be located in the module directory. If this
+  // value is non-empty then it must be an absolute path. This value is ignored
+  // on Mac OS X where pack files are always loaded from the app bundle
+  // Resources directory. Also configurable using the "locales-dir-path"
   // command-line switch.
   ///
   cef_string_t locales_dir_path;
@@ -377,19 +396,6 @@ typedef struct _cef_settings_t {
   // CefRequestContextSettings.ignore_certificate_errors value.
   ///
   int ignore_certificate_errors;
-
-  ///
-  // Set to true (1) to enable date-based expiration of built in network
-  // security information (i.e. certificate transparency logs, HSTS preloading
-  // and pinning information). Enabling this option improves network security
-  // but may cause HTTPS load failures when using CEF binaries built more than
-  // 10 weeks in the past. See https://www.certificate-transparency.org/ and
-  // https://www.chromium.org/hsts for details. Also configurable using the
-  // "enable-net-security-expiration" command-line switch. Can be overridden for
-  // individual CefRequestContext instances via the
-  // CefRequestContextSettings.enable_net_security_expiration value.
-  ///
-  int enable_net_security_expiration;
 
   ///
   // Background color used for the browser before a document is loaded and when
@@ -434,13 +440,13 @@ typedef struct _cef_request_context_settings_t {
 
   ///
   // The location where cache data for this request context will be stored on
-  // disk. If non-empty this must be either equal to or a child directory of
-  // CefSettings.root_cache_path. If empty then browsers will be created in
-  // "incognito mode" where in-memory caches are used for storage and no data is
-  // persisted to disk. HTML5 databases such as localStorage will only persist
-  // across sessions if a cache path is specified. To share the global browser
-  // cache and related configuration set this value to match the
-  // CefSettings.cache_path value.
+  // disk. If this value is non-empty then it must be an absolute path that is
+  // either equal to or a child directory of CefSettings.root_cache_path. If
+  // this value is empty then browsers will be created in "incognito mode" where
+  // in-memory caches are used for storage and no data is persisted to disk.
+  // HTML5 databases such as localStorage will only persist across sessions if a
+  // cache path is specified. To share the global browser cache and related
+  // configuration set this value to match the CefSettings.cache_path value.
   ///
   cef_string_t cache_path;
 
@@ -471,17 +477,6 @@ typedef struct _cef_request_context_settings_t {
   // |cache_path| matches the CefSettings.cache_path value.
   ///
   int ignore_certificate_errors;
-
-  ///
-  // Set to true (1) to enable date-based expiration of built in network
-  // security information (i.e. certificate transparency logs, HSTS preloading
-  // and pinning information). Enabling this option improves network security
-  // but may cause HTTPS load failures when using CEF binaries built more than
-  // 10 weeks in the past. See https://www.certificate-transparency.org/ and
-  // https://www.chromium.org/hsts for details. Can be set globally using the
-  // CefSettings.enable_net_security_expiration value.
-  ///
-  int enable_net_security_expiration;
 
   ///
   // Comma delimited ordered list of language codes without any whitespace that
@@ -742,7 +737,31 @@ typedef struct _cef_urlparts_t {
   // Query string component (i.e., everything following the '?').
   ///
   cef_string_t query;
+
+  ///
+  // Fragment (hash) identifier component (i.e., the string following the '#').
+  ///
+  cef_string_t fragment;
 } cef_urlparts_t;
+
+///
+// Cookie priority values.
+///
+typedef enum {
+  CEF_COOKIE_PRIORITY_LOW = -1,
+  CEF_COOKIE_PRIORITY_MEDIUM = 0,
+  CEF_COOKIE_PRIORITY_HIGH = 1,
+} cef_cookie_priority_t;
+
+///
+// Cookie same site values.
+///
+typedef enum {
+  CEF_COOKIE_SAME_SITE_UNSPECIFIED,
+  CEF_COOKIE_SAME_SITE_NO_RESTRICTION,
+  CEF_COOKIE_SAME_SITE_LAX_MODE,
+  CEF_COOKIE_SAME_SITE_STRICT_MODE,
+} cef_cookie_same_site_t;
 
 ///
 // Cookie information.
@@ -798,6 +817,16 @@ typedef struct _cef_cookie_t {
   ///
   int has_expires;
   cef_time_t expires;
+
+  ///
+  // Same site.
+  ///
+  cef_cookie_same_site_t same_site;
+
+  ///
+  // Priority.
+  ///
+  cef_cookie_priority_t priority;
 } cef_cookie_t;
 
 ///
@@ -894,7 +923,7 @@ typedef enum {
   // No error.
   ERR_NONE = 0,
 
-#define NET_ERROR(label, value) ERR_ ## label = value,
+#define NET_ERROR(label, value) ERR_##label = value,
 #include "include/base/internal/cef_net_error_list.h"
 #undef NET_ERROR
 
@@ -1124,9 +1153,8 @@ typedef enum {
   TT_LINK = 0,
 
   ///
-  // Source is some other "explicit" navigation action such as creating a new
-  // browser or using the LoadURL function. This is also the default value
-  // for navigations where the actual type is unknown.
+  // Source is some other "explicit" navigation. This is the default value for
+  // navigations where the actual type is unknown. See also TT_DIRECT_LOAD_FLAG.
   ///
   TT_EXPLICIT = 1,
 
@@ -1178,8 +1206,14 @@ typedef enum {
 
   ///
   // Used the Forward or Back function to navigate among browsing history.
+  // Will be ORed to the transition type for the original load.
   ///
   TT_FORWARD_BACK_FLAG = 0x01000000,
+
+  ///
+  // Loaded a URL directly via CreateBrowser, LoadURL or LoadRequest.
+  ///
+  TT_DIRECT_LOAD_FLAG = 0x02000000,
 
   ///
   // The beginning of a navigation chain.
@@ -1445,7 +1479,7 @@ typedef enum {
   ///
   // The main thread in the renderer. Used for all WebKit and V8 interaction.
   // Tasks may be posted to this thread after
-  // CefRenderProcessHandler::OnRenderThreadCreated but are not guaranteed to
+  // CefRenderProcessHandler::OnWebKitInitialized but are not guaranteed to
   // run before sub-process termination (sub-processes may be killed at any time
   // without warning).
   ///
@@ -1787,6 +1821,7 @@ typedef enum {
   EVENTFLAG_IS_KEY_PAD = 1 << 9,
   EVENTFLAG_IS_LEFT = 1 << 10,
   EVENTFLAG_IS_RIGHT = 1 << 11,
+  EVENTFLAG_ALTGR_DOWN = 1 << 12,
 } cef_event_flags_t;
 
 ///
@@ -2244,7 +2279,13 @@ typedef enum {
   CT_ZOOMOUT,
   CT_GRAB,
   CT_GRABBING,
+  CT_MIDDLE_PANNING_VERTICAL,
+  CT_MIDDLE_PANNING_HORIZONTAL,
   CT_CUSTOM,
+  CT_DND_NONE,
+  CT_DND_MOVE,
+  CT_DND_COPY,
+  CT_DND_LINK,
 } cef_cursor_type_t;
 
 ///
@@ -2305,20 +2346,9 @@ typedef enum {
   UU_URL_SPECIAL_CHARS_EXCEPT_PATH_SEPARATORS = 1 << 3,
 
   ///
-  // Unescapes characters that can be used in spoofing attempts (such as LOCK)
-  // and control characters (such as BiDi control characters and %01).  This
-  // INCLUDES NULLs.  This is used for rare cases such as data: URL decoding
-  // where the result is binary data.
-  //
-  // DO NOT use UU_SPOOFING_AND_CONTROL_CHARS if the URL is going to be
-  // displayed in the UI for security reasons.
-  ///
-  UU_SPOOFING_AND_CONTROL_CHARS = 1 << 4,
-
-  ///
   // URL queries use "+" for space. This flag controls that replacement.
   ///
-  UU_REPLACE_PLUS_WITH_SPACE = 1 << 5,
+  UU_REPLACE_PLUS_WITH_SPACE = 1 << 4,
 } cef_uri_unescape_rule_t;
 
 ///
@@ -2441,13 +2471,13 @@ typedef struct _cef_pdf_print_settings_t {
   int scale_factor;
 
   ///
-  // Margins in millimeters. Only used if |margin_type| is set to
+  // Margins in points. Only used if |margin_type| is set to
   // PDF_PRINT_MARGIN_CUSTOM.
   ///
-  double margin_top;
-  double margin_right;
-  double margin_bottom;
-  double margin_left;
+  int margin_top;
+  int margin_right;
+  int margin_bottom;
+  int margin_left;
 
   ///
   // Margin type.
@@ -2939,6 +2969,16 @@ typedef enum {
 } cef_cdm_registration_error_t;
 
 ///
+// Composition underline style.
+///
+typedef enum {
+  CEF_CUS_SOLID,
+  CEF_CUS_DOT,
+  CEF_CUS_DASH,
+  CEF_CUS_NONE,
+} cef_composition_underline_style_t;
+
+///
 // Structure representing IME composition underline information. This is a thin
 // wrapper around Blink's WebCompositionUnderline class and should be kept in
 // sync with that.
@@ -2963,11 +3003,16 @@ typedef struct _cef_composition_underline_t {
   // Set to true (1) for thick underline.
   ///
   int thick;
+
+  ///
+  // Style.
+  ///
+  cef_composition_underline_style_t style;
 } cef_composition_underline_t;
 
 ///
 // Enumerates the various representations of the ordering of audio channels.
-// Logged to UMA, so never reuse a value, always add new/greater ones!
+// Must be kept synchronized with media::ChannelLayout from Chromium.
 // See media\base\channel_layout.h
 ///
 typedef enum {
@@ -3075,6 +3120,93 @@ typedef enum {
   // Max value, must always equal the largest entry ever logged.
   CEF_CHANNEL_LAYOUT_MAX = CEF_CHANNEL_LAYOUT_BITSTREAM
 } cef_channel_layout_t;
+
+///
+// Structure representing the audio parameters for setting up the audio handler.
+///
+typedef struct _cef_audio_parameters_t {
+  ///
+  // Layout of the audio channels
+  ///
+  cef_channel_layout_t channel_layout;
+
+  ///
+  // Sample rate
+  //
+  int sample_rate;
+
+  ///
+  // Number of frames per buffer
+  ///
+  int frames_per_buffer;
+} cef_audio_parameters_t;
+
+///
+// Result codes for CefMediaRouter::CreateRoute. Should be kept in sync with
+// Chromium's media_router::RouteRequestResult::ResultCode type.
+///
+typedef enum {
+  CEF_MRCR_UNKNOWN_ERROR = 0,
+  CEF_MRCR_OK = 1,
+  CEF_MRCR_TIMED_OUT = 2,
+  CEF_MRCR_ROUTE_NOT_FOUND = 3,
+  CEF_MRCR_SINK_NOT_FOUND = 4,
+  CEF_MRCR_INVALID_ORIGIN = 5,
+  CEF_MRCR_NO_SUPPORTED_PROVIDER = 7,
+  CEF_MRCR_CANCELLED = 8,
+  CEF_MRCR_ROUTE_ALREADY_EXISTS = 9,
+
+  CEF_MRCR_TOTAL_COUNT = 11  // The total number of values.
+} cef_media_route_create_result_t;
+
+///
+// Connection state for a MediaRoute object.
+///
+typedef enum {
+  CEF_MRCS_UNKNOWN,
+  CEF_MRCS_CONNECTING,
+  CEF_MRCS_CONNECTED,
+  CEF_MRCS_CLOSED,
+  CEF_MRCS_TERMINATED,
+} cef_media_route_connection_state_t;
+
+///
+// Icon types for a MediaSink object. Should be kept in sync with Chromium's
+// media_router::SinkIconType type.
+///
+typedef enum {
+  CEF_MSIT_CAST,
+  CEF_MSIT_CAST_AUDIO_GROUP,
+  CEF_MSIT_CAST_AUDIO,
+  CEF_MSIT_MEETING,
+  CEF_MSIT_HANGOUT,
+  CEF_MSIT_EDUCATION,
+  CEF_MSIT_WIRED_DISPLAY,
+  CEF_MSIT_GENERIC,
+
+  CEF_MSIT_TOTAL_COUNT,  // The total number of values.
+} cef_media_sink_icon_type_t;
+
+///
+// Device information for a MediaSink object.
+///
+typedef struct _cef_media_sink_device_info_t {
+  cef_string_t ip_address;
+  int port;
+  cef_string_t model_name;
+} cef_media_sink_device_info_t;
+
+///
+// Represents commands available to TextField.
+///
+typedef enum {
+  CEF_TFC_CUT = 1,
+  CEF_TFC_COPY,
+  CEF_TFC_PASTE,
+  CEF_TFC_UNDO,
+  CEF_TFC_DELETE,
+  CEF_TFC_SELECT_ALL,
+} cef_text_field_commands_t;
 
 #ifdef __cplusplus
 }

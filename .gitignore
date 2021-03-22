@@ -35,3 +35,5 @@ CefGlue.BrowserProcess/Properties/PublishProfiles/
 #Nuget
 NuGet/output/
 packages/
+CefGlue.Interop.Gen/Classes.Handlers.tmpl/
+CefGlue.Interop.Gen/Classes.Proxies.tmpl/

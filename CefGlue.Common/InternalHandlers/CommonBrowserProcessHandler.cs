@@ -38,11 +38,6 @@ namespace Xilium.CefGlue.Common.InternalHandlers
             _handler?.HandleContextInitialized();
         }
 
-        protected override void OnRenderProcessThreadCreated(CefListValue extraInfo)
-        {
-            _handler?.HandleRenderProcessThreadCreated(extraInfo);
-        }
-
         protected override void OnScheduleMessagePumpWork(long delayMs)
         {
             _handler?.HandleScheduleMessagePumpWork(delayMs);

@@ -1,4 +1,4 @@
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System.Threading.Tasks;
 using Xilium.CefGlue.Common.Events;
 

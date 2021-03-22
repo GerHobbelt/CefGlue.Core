@@ -1,7 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using Xilium.CefGlue.Common.Handlers;
 using Xilium.CefGlue.Common.Shared;
 
@@ -27,23 +26,40 @@ namespace Xilium.CefGlue.Common
 
             settings.UncaughtExceptionStackSize = 100; // for uncaught exception event work properly
 
+            var path = AppDomain.CurrentDomain.BaseDirectory;
+
+            var subprocessPath = Path.Combine(path, BrowserProcessFileName);
+            if (!File.Exists(subprocessPath))
+            {
+                subprocessPath = Path.Combine(path, "CefGlueBrowserProcess", BrowserProcessFileName);
+                
+                if (!File.Exists(subprocessPath))
+                {
+                    throw new FileNotFoundException($"Unable to find \"{subprocessPath}\"");
+                }
+            }
+            
+            settings.BrowserSubprocessPath = subprocessPath;
+
             switch (CefRuntime.Platform)
             {
                 case CefRuntimePlatform.Windows:
-                    var path = new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath;
-                    path = Path.Combine(Path.GetDirectoryName(path), "Xilium.CefGlue.BrowserProcess.exe");
-                    if (!File.Exists(path))
-                    {
-                        throw new FileNotFoundException($"Unable to find \"{path}\"");
-                    }
-                    settings.BrowserSubprocessPath = path;
                     settings.MultiThreadedMessageLoop = true;
                     break;
 
                 case CefRuntimePlatform.MacOSX:
+                    var resourcesPath = Path.Combine(path, "Resources");
+                    if (!Directory.Exists(resourcesPath))
+                    {
+                        throw new FileNotFoundException($"Unable to find Resources folder");
+                    }
+
                     settings.NoSandbox = true;
                     settings.MultiThreadedMessageLoop = false;
                     settings.ExternalMessagePump = true;
+                    settings.MainBundlePath = path;
+                    settings.FrameworkDirPath = path;
+                    settings.ResourcesDirPath = resourcesPath;
                     break;
             }
 
@@ -72,10 +88,23 @@ namespace Xilium.CefGlue.Common
             {
                 InternalInitialize(browserProcessHandler: browserProcessHandler);
             }
-        } 
+        }
 
         public static bool IsLoaded => CefRuntime.IsInitialized;
 
         internal static bool IsOSREnabled { get; private set; }
+
+        private static string BrowserProcessFileName {
+            get {
+                const string Filename = "Xilium.CefGlue.BrowserProcess";
+                switch (CefRuntime.Platform)
+                {
+                    case CefRuntimePlatform.Windows:
+                        return Filename + ".exe";
+                    default:
+                        return Filename;
+                }
+            }
+        }
     }
 }

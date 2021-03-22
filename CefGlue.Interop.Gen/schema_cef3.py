@@ -160,4 +160,15 @@ classdef = {
     'CefResourceReadCallback': { 'role': ROLE_PROXY },
     'CefResourceRequestHandler': { 'role': ROLE_HANDLER },
     'CefCookieAccessFilter': { 'role': ROLE_HANDLER },
+    # 80
+    'CefRegistration': { 'role': ROLE_PROXY },
+    'CefMediaRouter': { 'role': ROLE_PROXY },
+    'CefMediaObserver': { 'role': ROLE_HANDLER },
+    'CefMediaRoute': { 'role': ROLE_PROXY },
+    'CefMediaRouteCreateCallback': { 'role': ROLE_HANDLER },
+    'CefMediaSink': { 'role': ROLE_PROXY },
+    'CefMediaSource': { 'role': ROLE_PROXY },
+    # 83
+    'CefDevToolsMessageObserver': { 'role': ROLE_HANDLER },
+    'CefMediaSinkDeviceInfoCallback': { 'role': ROLE_HANDLER, 'autodispose': True },
     }

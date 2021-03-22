@@ -2,6 +2,7 @@ namespace Xilium.CefGlue.Common.Handlers
 {
     public class BrowserProcessHandler : CefBrowserProcessHandler
     {
+
         internal CefPrintHandler HandleGetPrintHandler()
         {
             return GetPrintHandler();
@@ -15,11 +16,6 @@ namespace Xilium.CefGlue.Common.Handlers
         internal void HandleContextInitialized()
         {
             OnContextInitialized();
-        }
-
-        internal void HandleRenderProcessThreadCreated(CefListValue extraInfo)
-        {
-            OnRenderProcessThreadCreated(extraInfo);
         }
 
         internal void HandleScheduleMessagePumpWork(long delayMs)

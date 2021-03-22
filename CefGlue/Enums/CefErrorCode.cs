@@ -134,7 +134,7 @@ namespace Xilium.CefGlue
         NETWORK_CHANGED = -21,
 
         /// <summary>
-        /// The request was blocked by the URL blacklist configured by the domain
+        /// The request was blocked by the URL block list configured by the domain
         /// administrator.
         /// </summary>
         BLOCKED_BY_ADMINISTRATOR = -22,
@@ -170,17 +170,23 @@ namespace Xilium.CefGlue
         /// </summary>
         BLOCKED_BY_RESPONSE = -27,
 
-        /// <summary>
-        /// The request failed after the response was received, based on client-side
-        /// heuristics that point to the possiblility of a cross-site scripting attack.
-        /// </summary>
-        BLOCKED_BY_XSS_AUDITOR = -28,
+        // Error -28 was removed (BLOCKED_BY_XSS_AUDITOR).
 
         /// <summary>
         /// The request was blocked by system policy disallowing some or all cleartext
         /// requests. Used for NetworkSecurityPolicy on Android.
         /// </summary>
         CLEARTEXT_NOT_PERMITTED = -29,
+
+        /// <summary>
+        /// The request was blocked by a Content Security Policy.
+        /// </summary>
+        BLOCKED_BY_CSP = -30,
+
+        /// <summary>
+        /// The request was blocked because of no H/2 or QUIC session.
+        /// </summary>
+        H2_OR_QUIC_REQUIRED = -31,
 
         /// <summary>
         /// A connection was closed (corresponding to a TCP FIN).
@@ -337,10 +343,7 @@ namespace Xilium.CefGlue
         /// </summary>
         PROXY_AUTH_REQUESTED = -127,
 
-        /// <summary>
-        /// The SSL server attempted to use a weak ephemeral Diffie-Hellman key.
-        /// </summary>
-        SSL_WEAK_SERVER_EPHEMERAL_DH_KEY = -129,
+        // Error -129 was removed (SSL_WEAK_SERVER_EPHEMERAL_DH_KEY).
 
         /// <summary>
         /// Could not create a connection to the proxy server. An error occurred
@@ -423,11 +426,7 @@ namespace Xilium.CefGlue
         /// </summary>
         MSG_TOO_BIG = -142,
 
-        /// <summary>
-        /// A SPDY session already exists, and should be used instead of this connection.
-        /// </summary>
-        SPDY_SESSION_ALREADY_EXISTS = -143,
-
+        // Error -143 was removed (SPDY_SESSION_ALREADY_EXISTS)
         // Error -144 was removed (LIMIT_VIOLATION).
 
         /// <summary>
@@ -465,11 +464,7 @@ namespace Xilium.CefGlue
         /// </summary>
         CLIENT_AUTH_CERT_TYPE_UNSUPPORTED = -151,
 
-        /// <summary>
-        /// Server requested one type of cert, then requested a different type while the
-        /// first was still being generated.
-        /// </summary>
-        ORIGIN_BOUND_CERT_GENERATION_TYPE_MISMATCH = -152,
+        // Error -152 was removed (ORIGIN_BOUND_CERT_GENERATION_TYPE_MISMATCH)
 
         /// <summary>
         /// An SSL peer sent us a fatal decrypt_error alert. This typically occurs when
@@ -589,21 +584,7 @@ namespace Xilium.CefGlue
         /// </summary>
         READ_IF_READY_NOT_IMPLEMENTED = -174,
 
-        /// <summary>
-        /// This error is emitted if TLS 1.3 is enabled, connecting with it failed, but
-        /// retrying at a downgraded maximum version succeeded. This could mean:
-        ///
-        /// 1. This is a transient network error that will be resolved when the user
-        ///    reloads.
-        ///
-        /// 2. The user is behind a buggy network middlebox, firewall, or proxy which is
-        ///    interfering with TLS 1.3.
-        ///
-        /// 3. The server is buggy and does not implement TLS version negotiation
-        ///    correctly. TLS 1.3 was tweaked to avoid a common server bug here, so this
-        ///    is unlikely.
-        /// </summary>
-        SSL_VERSION_INTERFERENCE = -175,
+        // Error -175 was removed (SSL_VERSION_INTERFERENCE).
 
         /// <summary>
         /// No socket buffer space is available.
@@ -784,13 +765,27 @@ namespace Xilium.CefGlue
         /// </summary>
         CERT_SYMANTEC_LEGACY = -215,
 
+        // -216 was QUIC_CERT_ROOT_NOT_KNOWN which has been renumbered to not be in the
+        // certificate error range.
+
+        /// <summary>
+        /// The certificate is known to be used for interception by an entity other
+        /// the device owner.
+        /// </summary>
+        CERT_KNOWN_INTERCEPTION_BLOCKED = -217,
+
+        /// <summary>
+        /// The connection uses an obsolete version of SSL/TLS.
+        /// </summary>
+        SSL_OBSOLETE_VERSION = -218,
+
         // Add new certificate error codes here.
         //
         // Update the value of CERT_END whenever you add a new certificate error
         // code.
 
         // The value immediately past the last certificate error code.
-        //CERT_END = -216,
+        //CERT_END = -219,
 
         /// <summary>
         /// The URL is invalid.
@@ -862,10 +857,7 @@ namespace Xilium.CefGlue
         /// </summary>
         RESPONSE_HEADERS_TOO_BIG = -325,
 
-        /// <summary>
-        /// The PAC requested by HTTP did not have a valid status code (non-200).
-        /// </summary>
-        PAC_STATUS_NOT_OK = -326,
+        // Error -326 was removed (PAC_STATUS_NOT_OK)
 
         /// <summary>
         /// The evaluation of the PAC script failed.
@@ -918,9 +910,9 @@ namespace Xilium.CefGlue
         NO_SUPPORTED_PROXIES = -336,
 
         /// <summary>
-        /// There is a SPDY protocol error.
+        /// There is an HTTP/2 protocol error.
         /// </summary>
-        SPDY_PROTOCOL_ERROR = -337,
+        HTTP2_PROTOCOL_ERROR = -337,
 
         /// <summary>
         /// Credentials could not be established during HTTP Authentication.
@@ -970,10 +962,10 @@ namespace Xilium.CefGlue
         RESPONSE_HEADERS_MULTIPLE_CONTENT_LENGTH = -346,
 
         /// <summary>
-        /// SPDY Headers have been received, but not all of them - status or version
+        /// HTTP/2 headers have been received, but not all of them - status or version
         /// headers are missing, so we're expecting additional frames to complete them.
         /// </summary>
-        INCOMPLETE_SPDY_HEADERS = -347,
+        INCOMPLETE_HTTP2_HEADERS = -347,
 
         /// <summary>
         /// No PAC URL configuration could be retrieved from DHCP. This can indicate
@@ -999,12 +991,12 @@ namespace Xilium.CefGlue
         /// been processed yet, or a RST_STREAM frame with error code REFUSED_STREAM.
         /// Client MAY retry (on a different connection).  See RFC7540 Section 8.1.4.
         /// </summary>
-        SPDY_SERVER_REFUSED_STREAM = -351,
+        HTTP2_SERVER_REFUSED_STREAM = -351,
 
         /// <summary>
-        /// SPDY server didn't respond to the PING message.
+        /// HTTP/2 server didn't respond to the PING message.
         /// </summary>
-        SPDY_PING_FAILED = -352,
+        HTTP2_PING_FAILED = -352,
 
         // Obsolete.  Kept here to avoid reuse, as the old error can still appear on
         // histograms.
@@ -1043,24 +1035,24 @@ namespace Xilium.CefGlue
         // REQUEST_FOR_SECURE_RESOURCE_OVER_INSECURE_QUIC = -359,
 
         /// <summary>
-        /// Transport security is inadequate for the SPDY version.
+        /// Transport security is inadequate for the HTTP/2 version.
         /// </summary>
-        SPDY_INADEQUATE_TRANSPORT_SECURITY = -360,
+        HTTP2_INADEQUATE_TRANSPORT_SECURITY = -360,
 
         /// <summary>
-        /// The peer violated SPDY flow control.
+        /// The peer violated HTTP/2 flow control.
         /// </summary>
-        SPDY_FLOW_CONTROL_ERROR = -361,
+        HTTP2_FLOW_CONTROL_ERROR = -361,
 
         /// <summary>
-        /// The peer sent an improperly sized SPDY frame.
+        /// The peer sent an improperly sized HTTP/2 frame.
         /// </summary>
-        SPDY_FRAME_SIZE_ERROR = -362,
+        HTTP2_FRAME_SIZE_ERROR = -362,
 
         /// <summary>
-        /// Decoding or encoding of compressed SPDY headers failed.
+        /// Decoding or encoding of compressed HTTP/2 headers failed.
         /// </summary>
-        SPDY_COMPRESSION_ERROR = -363,
+        HTTP2_COMPRESSION_ERROR = -363,
 
         /// <summary>
         /// Proxy Auth Requested without a valid Client Socket Handle.
@@ -1103,18 +1095,18 @@ namespace Xilium.CefGlue
         /// be handled internally by HTTP/2 code, and should not make it above the
         /// SpdyStream layer.
         /// </summary>
-        SPDY_RST_STREAM_NO_ERROR_RECEIVED = -372,
+        HTTP2_RST_STREAM_NO_ERROR_RECEIVED = -372,
 
         /// <summary>
         /// The pushed stream claimed by the request is no longer available.
         /// </summary>
-        SPDY_PUSHED_STREAM_NOT_AVAILABLE = -373,
+        HTTP2_PUSHED_STREAM_NOT_AVAILABLE = -373,
 
         /// <summary>
         /// A pushed stream was claimed and later reset by the server. When this happens,
         /// the request should be retried.
         /// </summary>
-        SPDY_CLAIMED_PUSHED_STREAM_RESET_BY_SERVER = -374,
+        HTTP2_CLAIMED_PUSHED_STREAM_RESET_BY_SERVER = -374,
 
         /// <summary>
         /// An HTTP transaction was retried too many times due for authentication or
@@ -1127,18 +1119,34 @@ namespace Xilium.CefGlue
         /// <summary>
         /// Received an HTTP/2 frame on a closed stream.
         /// </summary>
-        SPDY_STREAM_CLOSED = -376,
+        HTTP2_STREAM_CLOSED = -376,
 
         /// <summary>
         /// Client is refusing an HTTP/2 stream.
         /// </summary>
-        SPDY_CLIENT_REFUSED_STREAM = -377,
+        HTTP2_CLIENT_REFUSED_STREAM = -377,
 
         /// <summary>
         /// A pushed HTTP/2 stream was claimed by a request based on matching URL and
         /// request headers, but the pushed response headers do not match the request.
         /// </summary>
-        SPDY_PUSHED_RESPONSE_DOES_NOT_MATCH = -378,
+        HTTP2_PUSHED_RESPONSE_DOES_NOT_MATCH = -378,
+
+        /// <summary>
+        /// The server returned a non-2xx HTTP response code.
+        ///
+        /// Not that this error is only used by certain APIs that interpret the HTTP
+        /// response itself. URLRequest for instance just passes most non-2xx
+        /// response back as success.
+        /// </summary>
+        HTTP_RESPONSE_CODE_FAILURE = -379,
+
+        /// <summary>
+        /// The certificate presented on a QUIC connection does not chain to a known root
+        /// and the origin connected to is not on a list of domains where unknown roots
+        /// are allowed.
+        /// </summary>
+        QUIC_CERT_ROOT_NOT_KNOWN = -380,
 
         /// <summary>
         /// The cache does not have the requested entry.
@@ -1241,6 +1249,24 @@ namespace Xilium.CefGlue
         /// An error occurred while handling a signed exchange.
         /// </summary>
         INVALID_SIGNED_EXCHANGE = -504,
+
+        /// <summary>
+        /// An error occurred while handling a Web Bundle source.
+        /// </summary>
+        INVALID_WEB_BUNDLE = -505,
+
+        /// <summary>
+        /// A Trust Tokens protocol operation-executing request failed for one of a
+        /// number of reasons (precondition failure, internal error, bad response).
+        /// </summary>
+        TRUST_TOKEN_OPERATION_FAILED = -506,
+
+        /// <summary>
+        /// When handling a Trust Tokens protocol operation-executing request, the system
+        /// found that the request's desired Trust Tokens results were already present in
+        /// a local cache; as a result, the main request was cancelled.
+        /// </summary>
+        TRUST_TOKEN_OPERATION_CACHE_HIT = -507,
 
         // *** Code -600 is reserved (was FTP_PASV_COMMAND_FAILED). ***
 
@@ -1391,7 +1417,10 @@ namespace Xilium.CefGlue
         DNS_TIMED_OUT = -803,
 
         /// <summary>
-        /// The entry was not found in cache, for cache-only lookups.
+        /// The entry was not found in cache or other local sources, for lookups where
+        /// only local sources were queried.
+        /// TODO(ericorth): Consider renaming to DNS_LOCAL_MISS or something like that as
+        /// the cache is not necessarily queried either.
         /// </summary>
         DNS_CACHE_MISS = -804,
 
@@ -1405,11 +1434,12 @@ namespace Xilium.CefGlue
         /// </summary>
         DNS_SORT_ERROR = -806,
 
-        /// <summary>
-        /// Failed to resolve over HTTP, fallback to legacy
-        /// </summary>
-        DNS_HTTP_FAILED = -807,
+        // Error -807 was removed (DNS_HTTP_FAILED)
 
+        /// <summary>
+        /// Failed to resolve the hostname of a DNS-over-HTTPS server.
+        /// </summary>
+        DNS_SECURE_RESOLVER_HOSTNAME_RESOLUTION_FAILED = -808,
 
         // CefGlue backward compatiblity.
         // Generally we prefer .NET naming rules, but will care about later.

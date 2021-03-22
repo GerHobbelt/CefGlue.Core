@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
@@ -12,10 +12,10 @@ namespace CefGlue.Tests.Javascript
             public int Age = 0;
         }
 
-        protected override Task ExtraSetup()
+        protected async override Task ExtraSetup()
         {
-            Browser.LoadContent("<script></script>");
-            return base.ExtraSetup();
+            await Browser.LoadContent("<script></script>");
+            await base.ExtraSetup();
         }
 
         [Test]
@@ -63,6 +63,21 @@ namespace CefGlue.Tests.Javascript
             const string ExceptionMessage = "ups";
             var exception = Assert.ThrowsAsync<Exception>(async () => await EvaluateJavascript<string>($"throw new Error('{ExceptionMessage}')"));
             StringAssert.Contains(ExceptionMessage, exception.Message);
+        }
+
+        [Test]
+        public void CancelledOnTimeout()
+        {
+            var timeout = TimeSpan.FromMilliseconds(500);
+            Assert.ThrowsAsync<TaskCanceledException>(async () => await EvaluateJavascript<string>($"var start = new Date(); while((new Date() - start) < ({timeout.TotalMilliseconds} + 200));", timeout));
+        }
+
+        [Test]
+        public async Task NotCancelledBeforeTimeout()
+        {
+            var timeout = TimeSpan.FromMilliseconds(500);
+            var result = await EvaluateJavascript<int>($"return 1;", timeout);
+            Assert.AreEqual(1, result);
         }
     }
 }

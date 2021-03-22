@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Xilium.CefGlue.Common.Handlers;
 using Xilium.CefGlue.Common.InternalHandlers;
 using Xilium.CefGlue.Common.Shared;
@@ -32,7 +32,7 @@ namespace Xilium.CefGlue.Common
                 if (_flags != null)
                 {
                     foreach (var flag in _flags)
-                    {
+                    {     
                         commandLine.AppendSwitch(flag.Key, flag.Value);
                     }
                 }

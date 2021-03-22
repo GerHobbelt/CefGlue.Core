@@ -2,16 +2,38 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks>net472;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net472;net5.0</TargetFrameworks>
     <AssemblyName>Xilium.CefGlue.BrowserProcess</AssemblyName>
     <RootNamespace>Xilium.CefGlue.BrowserProcess</RootNamespace>
     <Configurations>Debug;Release;Debug_WindowlessRender</Configurations>
     <RuntimeIdentifiers>osx-x64;win-x64</RuntimeIdentifiers>
   </PropertyGroup>
-
+  
+  <!-- using this custom command instead of a target because the target hangs the build on OSX -->
+  <PropertyGroup>
+    <CustomCommands>
+      <CustomCommands>
+        <Command>
+          <type>AfterBuild</type>
+          <command>dotnet publish --framework net5.0 --runtime osx-x64 -p:IsPublishing=True -p:PublishTrimmed=true</command>
+        </Command>
+      </CustomCommands>
+    </CustomCommands>
+  </PropertyGroup>
+    
   <ItemGroup>
     <ProjectReference Include="..\CefGlue.Common.Shared\CefGlue.Common.Shared.csproj" />
     <ProjectReference Include="..\CefGlue\CefGlue.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+  </ItemGroup>
+  <Target Name="PublishAppWin" AfterTargets="AfterBuild" Condition="$(TargetFramework.StartsWith('net5')) and '$(IsPublishing)' != 'True' and $([MSBuild]::IsOSPlatform('Windows'))">
+    <!-- Publish both platforms on Windows for packaging -->
+    <Message Text="Publishing..." Importance="High" />
+    <Exec Command="dotnet publish --framework $(TargetFramework) --configuration $(Configuration) -p:IsPublishing=True -p:PublishTrimmed=true --runtime win-x64" />
+    <Exec Command="dotnet publish --framework $(TargetFramework) --configuration $(Configuration) -p:IsPublishing=True -p:PublishTrimmed=true --runtime osx-x64" />
+  </Target>
 
 </Project>

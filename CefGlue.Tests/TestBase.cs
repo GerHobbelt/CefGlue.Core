@@ -1,12 +1,15 @@
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Threading;
+using CefGlue.Tests.CustomSchemes;
+using CefGlue.Tests.Helpers;
+using NUnit.Framework;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Threading;
-using CefGlue.Tests.Helpers;
-using NUnit.Framework;
 using Xilium.CefGlue.Avalonia;
+using Xilium.CefGlue.Common;
+using Xilium.CefGlue.Common.Shared;
 
 namespace CefGlue.Tests
 {
@@ -29,6 +32,14 @@ namespace CefGlue.Tests
             }
 
             var initializationTaskCompletionSource = new TaskCompletionSource<bool>();
+
+            CefRuntimeLoader.Initialize(customSchemes: new[] { 
+                new CustomScheme()
+                {
+                    SchemeName = CustomSchemeHandlerFactory.SchemeName,
+                    SchemeHandlerFactory = new CustomSchemeHandlerFactory()
+                }
+            });
 
             lock (initLock)
             {
@@ -74,6 +85,7 @@ namespace CefGlue.Tests
 
                 var browserInitTaskCompletionSource = new TaskCompletionSource<bool>();
                 browser = new AvaloniaCefBrowser();
+                browser.Settings.WebSecurity = Xilium.CefGlue.CefState.Disabled;
                 browser.BrowserInitialized += delegate () { browserInitTaskCompletionSource.SetResult(true); };
 
                 window.Content = browser;
@@ -108,6 +120,6 @@ namespace CefGlue.Tests
 
         protected Task Run(Action action) => Dispatcher.UIThread.InvokeAsync(action, DispatcherPriority.Background);
 
-        protected Task<T> EvaluateJavascript<T>(string script) => Browser.EvaluateJavaScript<T>("(function() { " + script + " })()");
+        protected Task<T> EvaluateJavascript<T>(string script, TimeSpan? timeout = null) => Browser.EvaluateJavaScript<T>("(function() { " + script + " })()", timeout: timeout);
     }
 }

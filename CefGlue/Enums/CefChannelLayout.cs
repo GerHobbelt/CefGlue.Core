@@ -6,8 +6,6 @@ namespace Xilium.CefGlue
 {
     /// <summary>
     /// Enumerates the various representations of the ordering of audio channels.
-    /// Logged to UMA, so never reuse a value, always add new/greater ones!
-    /// See media\base\channel_layout.h
     /// </summary>
     public enum CefChannelLayout
     {
@@ -118,7 +116,6 @@ namespace Xilium.CefGlue
         /// <summary>
         /// Stereo L, Stereo R, Front C, Rear L, Rear R, Rear C
         /// </summary>
-
         Layout_Hexagonal = 22,
 
         /// <summary>
@@ -176,9 +173,7 @@ namespace Xilium.CefGlue
         /// </summary>
         Bitstream = 32,
 
-        /// <summary>
-        /// Max value, must always equal the largest entry ever logged.
-        /// </summary>
-        Max = Bitstream
+        // Max value, must always equal the largest entry ever logged.
+        //CEF_CHANNEL_LAYOUT_MAX = CEF_CHANNEL_LAYOUT_BITSTREAM
     }
 }

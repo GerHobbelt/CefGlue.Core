@@ -46,7 +46,6 @@
 #include "include/cef_resource_handler.h"
 #include "include/cef_response.h"
 #include "include/cef_response_filter.h"
-#include "include/internal/cef_types_wrappers.h"
 
 class CefCookieAccessFilter;
 
@@ -73,7 +72,7 @@ class CefResourceRequestHandler : public virtual CefBaseRefCounted {
       CefRefPtr<CefBrowser> browser,
       CefRefPtr<CefFrame> frame,
       CefRefPtr<CefRequest> request) {
-    return NULL;
+    return nullptr;
   }
 
   ///
@@ -110,7 +109,7 @@ class CefResourceRequestHandler : public virtual CefBaseRefCounted {
       CefRefPtr<CefBrowser> browser,
       CefRefPtr<CefFrame> frame,
       CefRefPtr<CefRequest> request) {
-    return NULL;
+    return nullptr;
   }
 
   ///
@@ -164,7 +163,7 @@ class CefResourceRequestHandler : public virtual CefBaseRefCounted {
       CefRefPtr<CefFrame> frame,
       CefRefPtr<CefRequest> request,
       CefRefPtr<CefResponse> response) {
-    return NULL;
+    return nullptr;
   }
 
   ///
